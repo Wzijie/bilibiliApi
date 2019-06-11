@@ -218,7 +218,8 @@ app.get('/live', function (request, response) {
 			console.log('live success');
 		} else {
 			responseObj.success = false;
-			console.log('err');
+			responseObj.data = err;
+			console.log('live err');
 		}
 
 		response.send(responseObj);
@@ -273,7 +274,11 @@ app.get('/indexBangumi', function (request, response) {
 	superagent.get(requestURL).end(function (err, superagentRes) {
 
 		if (!err) {
-			responseObj.data = JSON.parse(superagentRes.text);
+			if (superagentRes.text) {
+				responseObj.data =JSON.parse(superagentRes.text);
+			} else {
+				responseObj.success = false;
+			}
 			console.log('indexBangumi success');
 		} else {
 			responseObj.success = false;
@@ -595,7 +600,8 @@ app.get('/indexLive', function (request, response) {
 			console.log('indexLive success');
 		} else {
 			responseObj.success = false;
-			console.log('err');
+			responseObj.data = err;
+			console.log('indexLive err');
 		}
 
 		response.send(responseObj);
