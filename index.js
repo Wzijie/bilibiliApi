@@ -660,7 +660,6 @@ app.get('/video/player', function (request, response) {
 		// .set('Upgrade-Insecure-Requests', '1')
 		.set('Cookie', `purl_token=bilibili_${Math.round(Date.now() / 1000)}`)
 		.set('User-Agent', 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1')
-
 		.end(function (err, superagentRes) {
 
 			if (!err) {
@@ -844,4 +843,48 @@ app.get('/search', function (request, response) {
 
 		});
 
+});
+
+// 视频详情
+app.get('/video/desc', function (request, response) {
+
+	const { aid } = request.query;
+
+	var responseObj = {
+		success: true,
+		data: {}
+	};
+
+	var requestURL = `https://api.bilibili.com/x/web-interface/view?aid=${aid}`;
+
+	superagent.get(requestURL)
+		.end(function (err, superagentRes) {
+			if (!err) {
+				console.log('/video/desc success');
+				const { 
+					title,
+					owner: { name, face },
+					desc,
+					stat: { view, danmaku, favorite },
+					ctime,
+				} = JSON.parse(superagentRes.text).data;
+
+				responseObj.data = {
+					title,
+					username: name,
+					face,
+					desc,
+					view,
+					danmaku,
+					favorite,
+					createTime: ctime * 1000,
+					navInfo: [],
+				};
+			} else {
+				console.log('/video/desc err');
+				responseObj.success = false;
+			}
+
+			response.send(responseObj);
+		});
 });
