@@ -118,9 +118,9 @@ app.get('/video/description', function (request, response) {
 		responseObj.data = Object.assign({}, videoInfo, detaied.data);
 		response.send(responseObj);
 	})
-	.catch(err => {
-		response.send({ ...responseObj, data: err });
-	});
+		.catch(err => {
+			response.send({ ...responseObj, data: err });
+		});
 
 });
 
@@ -275,7 +275,7 @@ app.get('/indexBangumi', function (request, response) {
 
 		if (!err) {
 			if (superagentRes.text) {
-				responseObj.data =JSON.parse(superagentRes.text);
+				responseObj.data = JSON.parse(superagentRes.text);
 			} else {
 				responseObj.success = false;
 			}
@@ -666,6 +666,7 @@ app.get('/video/player', function (request, response) {
 		// .set('Upgrade-Insecure-Requests', '1')
 		.set('Cookie', `purl_token=bilibili_${Math.round(Date.now() / 1000)}`)
 		.set('User-Agent', 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1')
+		.send('Referer', `https://m.bilibili.com/video/av${aid}.html?redirectFrom=h5`)
 		.end(function (err, superagentRes) {
 
 			if (!err) {
@@ -867,7 +868,7 @@ app.get('/video/desc', function (request, response) {
 		.end(function (err, superagentRes) {
 			if (!err) {
 				console.log('/video/desc success');
-				const { 
+				const {
 					title,
 					owner: { name, face },
 					desc,
@@ -892,5 +893,39 @@ app.get('/video/desc', function (request, response) {
 			}
 
 			response.send(responseObj);
+		});
+});
+
+// 用来转接视频数据的，没做成，请求视频地址获取不到内容
+app.get('/video', function (request, response) {
+
+	const requestURL = request.query.url;
+
+	superagent.get(requestURL)
+		// .accept('video/mp4')
+		// .set('Referer', '')
+		// .buffer(true)
+
+		
+		// .set('User-Agent', 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1')
+		.end(function (err, superagentRes) {
+			if (err) {
+				console.log(err, '/video err');
+				response.send(err);
+				return;
+			}
+			console.log(superagentRes, '/video success');
+			const contentLength = superagentRes.header['content-length'];
+			// response.set({
+			// 	// ...superagentRes.header,
+			// 	'Access-Control-Expose-Headers': 'Content-Length,Content-Range',
+			// 	'Connection': 'keep-alive',
+			// 	'Content-Type': 'video/mp4',
+			// 	'Cache-Control': 'max-age=600',
+			// 	'Content-Range': 'bytes 360448-13104137/13104138',
+			// });
+			console.log("res=", superagentRes.body);
+			// response.status(206);
+			response.send(superagentRes.body);
 		});
 });
